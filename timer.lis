@@ -1,0 +1,30 @@
+
+	            G L O B A L   R E F E R E N C E S
+
+	             Name               Value        Type
+	==============================|=======|===============
+	SP_INICIAL                       FDFF         CONSTANT
+	IO_READ                          FFFF         CONSTANT
+	IO_WRITE                         FFFE         CONSTANT
+	IO_STATUS                        FFFD         CONSTANT
+	IO_CONTROL                       FFFC         CONSTANT
+	IO_SW                            FFF9         CONSTANT
+	IO_LEDS                          FFF8         CONSTANT
+	LCD_WRITE                        FFF5         CONSTANT
+	LCD_CONTROL                      FFF4         CONSTANT
+	IO_DISPLAY                       FFF0         CONSTANT
+	TEMP                             FFF7         CONSTANT
+	TEMP_VALUE                       FFF6         CONSTANT
+	INT_MASK_ADDR                    FFFA         CONSTANT
+	INT_MASK                         8000         CONSTANT
+	INTF                             FE0F         VARIABLE
+	timer                            8000            TABLE
+	time_remaining                   8001         VARIABLE
+	INTFF                            0002            LABEL
+	display_time                     000F            LABEL
+	start_timer                      0016            LABEL
+	reset_timer                      0021            LABEL
+	inicio                           0026            LABEL
+	led_cycle                        0032            LABEL
+	timer_cycle                      0036            LABEL
+	end                              0042            LABEL

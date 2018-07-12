@@ -1,0 +1,33 @@
+
+	            G L O B A L   R E F E R E N C E S
+
+	             Name               Value        Type
+	==============================|=======|===============
+	SP_INICIAL                       FDFF         CONSTANT
+	IO_READ                          FFFF         CONSTANT
+	IO_WRITE                         FFFE         CONSTANT
+	IO_STATUS                        FFFD         CONSTANT
+	IO_CONTROL                       FFFC         CONSTANT
+	IO_SW                            FFF9         CONSTANT
+	IO_LEDS                          FFF8         CONSTANT
+	LCD_WRITE                        FFF5         CONSTANT
+	LCD_CONTROL                      FFF4         CONSTANT
+	IO_DISPLAY                       FFF0         CONSTANT
+	TEMP                             FFF7         CONSTANT
+	TEMP_VALUE                       FFF6         CONSTANT
+	INT_MASK_ADDR                    FFFA         CONSTANT
+	INT_MASK                         8001         CONSTANT
+	NL                               000A         CONSTANT
+	ZERO                             0030         CONSTANT
+	best_score                       8000            TABLE
+	current_score                    8001            TABLE
+	time_remaining                   8002            TABLE
+	init_game                        8003           STRING
+	print_digit                      0002            LABEL
+	clear_screen                     000B            LABEL
+	clear_ciclo                      000E            LABEL
+	display_best                     0016            LABEL
+	display_current                  0030            LABEL
+	display_time                     0041            LABEL
+	start                            0048            LABEL
+	end                              0051            LABEL

@@ -1,0 +1,23 @@
+
+	            G L O B A L   R E F E R E N C E S
+
+	             Name               Value        Type
+	==============================|=======|===============
+	filtro                           0007         CONSTANT
+	sp_inicial                       FDFF         CONSTANT
+	Guess                            8000         VARIABLE
+	Code                             8001         VARIABLE
+	check_direct                     0002            LABEL
+	check                            0007            LABEL
+	check_ret                        0025            LABEL
+	check_xes                        0028            LABEL
+	ciclo_xes                        0032            LABEL
+	salto_xes                        003B            LABEL
+	check_oes                        0046            LABEL
+	ciclo_oes                        0052            LABEL
+	check_digit                      0066            LABEL
+	ciclo_digit                      0072            LABEL
+	salto_digit                      007A            LABEL
+	ret_digit                        007E            LABEL
+	start                            0083            LABEL
+	end                              0090            LABEL

@@ -1,0 +1,3246 @@
+%!PS-Adobe-3.0
+%%Title: mastermind.as
+%%For: Baltasar Dinis
+%%Creator: a2ps version 4.14
+%%CreationDate: Thu Nov 30 01:04:55 2017
+%%BoundingBox: 24 24 571 818
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 8
+%%PageOrder: Ascend
+%%DocumentMedia: A4 595 842 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%Requirements: Tumble Duplex 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 595 def
+/sw 842 def
+/llx 24 def
+/urx 818 def
+/ury 571 def
+/lly 24 def
+/#copies 1 def
+%% Pagedevice definitions:
+countdictstack
+% Push our own mark, since there can be several PS marks pushed depending
+% where the failure really occured.
+/a2ps_mark
+{
+%%BeginFeature: *Tumble False
+  (<<) cvx exec /Tumble (false) cvx exec (>>) cvx exec setpagedevice
+%%EndFeature
+%%BeginFeature: *Duplex True
+  (<<) cvx exec /Duplex (true) cvx exec (>>) cvx exec setpagedevice
+%%EndFeature
+} stopped
+% My cleartomark
+{ /a2ps_mark eq { exit } if } loop
+countdictstack exch sub dup 0 gt
+{
+  { end } repeat
+}{
+  pop
+} ifelse
+/th 15.000000 def
+/fnfs 11 def
+/bfs 8.005733 def
+/cw 4.803440 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   501.959430 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(;;; Projeto IAC) c n
+(;;; Master Mind) N
+(;;; Primeira Entrega) N
+(;;; 27/10/2017) N
+() p n
+(;;; Baltasar Dinis 89416) c n
+(;;; Vasco Rodrigues 89557) N
+() p n
+() N
+(;zona 1: constantes) c n
+() p n
+(filtro) S 8 T () S 16 T () S
+(EQU) K
+() p 24 T (0007h ) S
+(; filtro para os primeiros 3 bits) c n
+(mascara   ) p 16 T () S
+(EQU) K
+() p 24 T (1000000000010110b ) S
+(; mascara para usar no modulo random) c n
+() p n
+(SP_INICIAL) S 16 T () S
+(EQU) K
+() p 24 T (FDFFh ) S
+(; stack pointer) c n
+(IO_READ) p 8 T () S 16 T () S
+(EQU) K
+() p 24 T (FFFFh ) S
+(; input janela de texto) c n
+(IO_WRITE) p 16 T () S
+(EQU) K
+() p 24 T (FFFEh ) S
+(; output janela de texto) c n
+(IO_STATUS) p 16 T () S
+(EQU) K
+() p 24 T (FFFDh ) S
+(; testa se foi premida tecla na janela de texto) c n
+(IO_CONTROL) p 16 T () S
+(EQU) K
+() p 24 T (FFFCh ) S
+(; posiciona o cursor na janela de texto) c n
+(IO_SW  ) p 8 T () S 16 T () S
+(EQU) K
+() p 24 T (FFF9h ) S
+(; 8 interruptores \(alavancas\)) c n
+(IO_LEDS) p 8 T () S 16 T () S
+(EQU) K
+() p 24 T (FFF8h ) S
+(; 16 leds \(1 por bit\)) c n
+(LCD_WRITE) p 16 T () S
+(EQU) K
+() p 24 T (FFF5h ) S
+(; escreve caracter no display) c n
+(LCD_CONTROL) p 16 T () S
+(EQU) K
+() p 24 T (FFF4h ) S
+(; colocar o cursor no display) c n
+(IO_DISPLAY) p 16 T () S
+(EQU) K
+() p 24 T (FFF0h ) S
+(; display de 7 leds) c n
+(TEMP) p 8 T () S 16 T () S
+(EQU) K
+() p 24 T (FFF7h ) S
+(; start/stop temporizador) c n
+(TEMP_VALUE) p 16 T () S
+(EQU) K
+() p 24 T (FFF6h ) S
+(; valor para gerar interrup\303\247\303\243o) c n
+(INT) K
+(_MASK_ADDR) p 16 T () S
+(EQU) K
+() p 24 T (FFFAh) N
+(INT) K
+(_MASK) p 16 T () S
+(EQU) K
+() p 24 T (8000h ) N
+(SPACE) S 8 T () S 16 T () S
+(EQU) K
+() p 24 T (' ' ) S
+(; codigo ascii do caracter de espa\303\247o) c n
+(ZERO) p 8 T () S 16 T () S
+(EQU) K
+() p 24 T ('0' ) S
+(; codigo ascii do zero) c n
+(NROUNDS_LOST) p 16 T () S
+(EQU) K
+() p 24 T (13 ) S
+(; pontuacao correspondente a uma jogada perdida; acab) c n
+(a a contagem quando o contador for igual a pontuacao de perder o jogo) N
+(NROUNDS_MAX) p 16 T () S
+(EQU) K
+() p 24 T (12 ) S
+(; pontuacao minima, correspondente ao numero maximo d) c n
+(e rondas) N
+(TEMP_STEP) p 16 T () S
+(EQU) K
+() p 24 T (10 ) S
+(; numero que e colocado no temporizador. Atua como re) c n
+(gulador da dificuldade do jogo. Quanto mais pequeno mais dificil) N
+( ) p n
+(;zona 2: variaveis) c n
+() p n
+() S 8 T () S 16 T () S
+(ORIG) K
+() p 24 T (8000h) N
+() N
+(; os valores utilizados pelo jogo sao declarados ) c n
+(; como variaveis para evitar a volatilidade dos registos) N
+(; sao utilizados apenas como meio inicial de passagem de parametros) N
+(; e como meio final de retorno de parametros) N
+() p n
+(; o utilizador introduz, pelo meio da placa do P3, a jogada, e esta fica) c n
+(; guardada em memoria) N
+(;) N
+(; o codigo, sempre que recalculado, e guardado em memoria) N
+(;) N
+(; o resultado \(da verificacao\) fica guardado em memoria) N
+(;) N
+(; a semente e acedida e escrita pela funcao random, para garantir que,) N
+(; no caso de multiplas chamadas, o numero e diferente) N
+(; a funcao get_seed inicializa a semente com o valor do temporizador) N
+(;) N
+(; a melhor pontuacao e inicializada em memoria com o valor) N
+(; mais baixo que o jogador pode ter, correspondendo ao valor de uma derrota) N
+(;) N
+(; a pontuacao atual e guardada em memoria) N
+(;) N
+(mastermind.as) (Page 1/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(; o tempo restante para o jogador efetuar a sua jogada e guardado em memoria) c n
+(;) N
+(; o temporizador esta guardado em memoria) N
+(;) N
+(; cursor mimica o funcionamento do porto de controlo da janela de texto) N
+() p n
+(jogada) S 8 T () S 16 T () S
+(TAB) K
+() p 24 T (1) N
+(codigo) S 8 T () S 16 T () S
+(TAB) K
+() p 24 T (1) N
+(resultado) S 16 T () S
+(TAB) K
+() p 24 T (1) N
+(semente) S 8 T () S 16 T () S
+(TAB) K
+() p 24 T (1 ) N
+(melhor_pont) S 16 T () S
+(WORD) K
+() p 24 T (NROUNDS_LOST) N
+(pont_atual) S 16 T () S
+(WORD) K
+() p 24 T (1 ) N
+(tempo_restante) S 16 T () S
+(WORD) K
+() p 24 T (FFFFh ) N
+(temporizador) S 16 T () S
+(TAB) K
+() p 24 T (1 ) N
+(cursor) S 8 T () S 16 T () S
+(WORD) K
+() p 24 T (0000h) N
+( ) N
+() N
+(; mensagens ) c n
+(inicia_jogo) p 16 T () S
+(STR) K
+() p 24 T ('Carregue no botao IA para iniciar|') N
+(ganhou) S 8 T () S 16 T () S
+(STR) K
+() p 24 T ('You won!|') N
+(perdeu) S 8 T () S 16 T () S
+(STR) K
+() p 24 T ('You lost... Good luck next time|') N
+() N
+() N
+(;zona 3: interrupcoes) c n
+() p n
+() S 8 T () S 16 T () S
+(ORIG) K
+() p 24 T (FE01h) N
+(INT) K
+(1) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(1F) p n
+(INT) K
+(2) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(2F) p n
+(INT) K
+(3) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(3F) p n
+(INT) K
+(4) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(4F) p n
+(INT) K
+(5) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(5F) p n
+(INT) K
+(6) p 8 T () S 16 T () S
+(WORD) K
+() p 24 T () S
+(INT) K
+(6F) p n
+() N
+() S 8 T () S 16 T () S
+(ORIG) K
+() p 24 T (FE0Ah) N
+(INTA) S 8 T () S 16 T () S
+(WORD) K
+() p 24 T (INTAF) N
+() N
+() S 8 T () S 16 T () S
+(ORIG) K
+() p 24 T (FE0Fh) N
+(INTF) S 8 T () S 16 T () S
+(WORD) K
+() p 24 T (INTFF) N
+() N
+() N
+(;zona 4: codigo) c n
+() p n
+() S 8 T () S 16 T () S
+(ORIG) K
+() p 24 T (0000h) N
+() S 8 T () S 16 T () S
+(JMP) K
+() p 24 T (inicio) N
+() N
+(; interrupcoes) c n
+() p n
+(; INT1 coloca o valor 1 no R3) c n
+(INT) K
+(1F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 1) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INT2 coloca o valor 2 no R3) c n
+(INT) K
+(2F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 2) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INT3 coloca o valor 3 no R3) c n
+(INT) K
+(3F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 3) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INT4 coloca o valor 4 no R3) c n
+(INT) K
+(4F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 4) N
+() S 8 T () S 16 T () S
+(RTI) K n
+(mastermind.as) (Page 2/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (1/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(; INT5 coloca o valor 5 no R3) c n
+(INT) K
+(5F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 5) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INT6 coloca o valor 6 no R3) c n
+(INT) K
+(6F:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, 6) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INTA coloca o valor do temporizador em R1, parando o temporizador) c n
+(INTAF:) p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[temporizador]) N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (reset_timer) N
+() S 8 T () S 16 T () S
+(RTI) K n
+() p n
+(; INTFF incrementa o temporizador, ) c n
+(INTFF:) p 8 T (       ) S 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p 8 T () S 16 T () S
+(INC) K
+() p 24 T (M[temporizador] ) S
+(;incrementa o temporizador de 100ms em 1) c n
+(00ms segundo) N
+() p 8 T () S 16 T () S
+(MOV) K
+( ) p 24 T (R1, 1 ) S
+(;reinicia o temporizador) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[TEMP_VALUE], R1) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[TEMP], R1) N
+() S 8 T () S 16 T () S
+(POP) K
+( ) p 24 T (R1) N
+() S 8 T () S 16 T () S
+(RTI) K n
+(        ) p 16 T () S
+(RTI) K n
+() p n
+(; modulo check) c n
+(; faz a validacao de uma jogada, excrevendo o resultado em memoria) N
+() p n
+(;; check_play: void ) c n
+(;;) N
+(;; modulo que estrutura a verificacao da jogada no ciclo de execucao do jogo) N
+(;; serve apenas para aumentar a legibilidade do codigo no cilco de execucao) N
+(check_play:) p 16 T () S
+(MOV) K
+() p 24 T (R2, M[jogada]) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, M[codigo]) N
+() N
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R0) N
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; jogada) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; codigo) c n
+() p 8 T () S 16 T () S
+(CALL) K
+() p 24 T (check) N
+() S 8 T () S 16 T () S
+(POP) K
+() p 24 T (M[resultado]  ) N
+() N
+(                ) S
+(RET) K n
+() p n
+() N
+(;; check: \(int, int\) -> int) c n
+(;;) N
+(;; verifica o resultado da jogada, comparando-a com o codigo ) N
+(;;) N
+(;; input: jogada e codigo) N
+(;; output: resultado, com o numero de X's no octeto menos significativo e ) N
+(;; o numero de O's no octeto mais significativo) N
+(check:) p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 5] ) S
+(; R1 <- jogada) c n
+() p n
+() S 8 T () S 16 T () S
+(CMP) K
+() p 24 T (R1,  M[SP + 4] ) S
+(; compara a jogada com o codigo) c n
+() p 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (check_direct) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (R2, M[SP + 4] ) S
+(; R2 <- codigo) c n
+(                ) p
+(PUSH) K
+() p 24 T (R0 ) S
+(; Resposta) c n
+(                ) p
+(PUSH) K
+() p 24 T (R1 ) S
+(; jogada) c n
+(                ) p
+(PUSH) K
+() p 24 T (R2 ) S
+(; codigo) c n
+(mastermind.as) (Page 3/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S
+(CALL) K
+() p 24 T (check_xes) N
+(                ) S
+(POP) K
+() p 24 T (R1) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[SP + 6], R1 ) S
+(; X's) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 5] ) S
+(; R1 <- jogada) c n
+() p n
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R0 ) S
+(; resposta) c n
+(                ) p
+(PUSH) K
+() p 24 T (R1 ) S
+(; jogada) c n
+(                ) p
+(PUSH) K
+() p 24 T (R2 ) S
+(; codigo) c n
+() p 8 T () S 16 T () S
+(CALL) K
+() p 24 T (check_oes) N
+() S 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1) N
+(                ) S
+(SUB) K
+() p 24 T (R1, M[SP + 6] ) S
+(; retira os valores que foram contados em ) c n
+(check_xes) N
+(                ) p
+(ROR) K
+() p 24 T (R1, 8 ) S
+(; coloca a resposta no octeto mais significativo d) c n
+(e R1) N
+() p 8 T () S 16 T () S
+(MVBH) K
+() p 24 T (M[SP + 6], R1 ) S
+(; O's) c n
+() p n
+(check_ret:) S 16 T () S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+() p 8 T () S 16 T () S
+(RETN) K
+() p 24 T (2) N
+() N
+(check_direct:  ) S 16 T () S
+(MOV) K
+() p 24 T (R1, 4 ) N
+() S 8 T () S 16 T () S
+(ADD) K
+() p 24 T (M[SP + 6], R1 ) S
+(; <8 bits a 0> + <'X's>) c n
+(                ) p
+(BR) K
+() p 24 T (check_ret) N
+( ) N
+() N
+(;; check_xes: \(int, int\) -> int) c n
+(;;) N
+(;; calcula quanto digitos na posicao certa estao na jogada ) N
+(;;) N
+(;; input: jogada e codigo) N
+(;; output: numero de pares na mesma posicao) N
+(check_xes:      ) p
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1 ) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R4 ) S
+(; preserva R4) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R5 ) S
+(; preserva R5) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, 4 ) S
+(; contador ciclo) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, R0 ) S
+(; contador X's ) c n
+(                ) p
+(MOV) K
+() p 24 T (R3, filtro ) S
+(; filtro) c n
+() p n
+(ciclo_xes:   ) S 16 T () S
+(MOV) K
+() p 24 T (R4, M[SP + 8] ) S
+(; recupera a jogada) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R5, M[SP + 7] ) S
+(; impede R2 de ser destuido / recupera o c) c n
+(odigo) N
+() p n
+(                ) S
+(AND) K
+() p 24 T (R4, R3 ) S
+(; aplica o filtro) c n
+(                ) p
+(AND) K
+() p 24 T (R5, R3 ) S
+(; aplica o filtro) c n
+(                ) p
+(CMP) K
+() p 24 T (R4, R5) N
+(                ) S
+(BR.NZ) K
+() p 24 T (salto_xes) N
+() N
+(                ) S
+(INC) K
+( ) p 24 T (R2 ) S
+(; incrementa o contador) c n
+() p n
+(salto_xes:      ) S
+(ROL) K
+() p 24 T (R3, 3 ) S
+(; muda o filtro de posicao) c n
+() p 8 T () S 16 T () S
+(DEC) K
+() p 24 T (R1) N
+(                ) S
+(BR.NZ) K
+() p 24 T (ciclo_xes) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (M[SP + 9], R2 ) S
+(; retorna a resposta) c n
+() p n
+(                ) S
+(POP) K
+() p 24 T (R5 ) S
+(; recupera R5) c n
+(                ) p
+(POP) K
+() p 24 T (R4 ) S
+(; recupera R4) c n
+(                ) p
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(mastermind.as) (Page 4/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (2/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (5-6) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RETN) K
+() p 24 T (2) N
+() N
+() N
+(;; check_oes: \(int, int\) -> int) c n
+(;;) N
+(;; verifica quantos pares em comum o codigo tem com a jogada) N
+(;; independentemente da posicao em que se encontram) N
+(;;) N
+(;; input: jogada e codigo) N
+(;; output : numero de pares de digitos em comum entre o codigo e a jogada) N
+(check_oes:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+(                ) p
+(PUSH) K
+() p 24 T (R4 ) S
+(; preserva R4) c n
+(                ) p
+(PUSH) K
+() p 24 T (R5 ) S
+(; preserva R5) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, 4) S
+(; contador do ciclo) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, M[SP + 7] ) S
+(; R4 <- codigo) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R4, R0 ) S
+(; contador dos O's) c n
+(                ) p
+(MOV) K
+() p 24 T (R5, M[SP + 8] ) S
+(; R5 <- jogada) c n
+() p n
+(ciclo_oes:) S 16 T () S
+(MOV) K
+() p 24 T (R3, 8 ) S
+(; ao dividir, o resto fica em R3) c n
+() p n
+() S 8 T () S 16 T () S
+(DIV) K
+() p 24 T (R5, R3 ) S
+(; isola um digito) c n
+(                ) p
+(PUSH) K
+() p 24 T (R0 ) N
+(                ) S
+(PUSH) K
+() p 24 T (R2 ) S
+(; codigo \(nao e preservado para guardar as mudancas e) c n
+( nao repetir a contagem\)) N
+(                ) p
+(PUSH) K
+() p 24 T (R3 ) S
+(; digito) c n
+(                ) p
+(CALL) K
+() p 24 T (check_digit ) N
+(                ) S
+(POP) K
+() p 24 T (R3) N
+(                ) S
+(ADD) K
+() p 24 T (R4, R3 ) S
+(; atualiza o resultado) c n
+() p n
+(                ) S
+(DEC) K
+() p 24 T (R1) N
+() N
+(                ) S
+(BR.NZ) K
+() p 24 T (ciclo_oes) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (M[SP + 9], R4 ) S
+(; escreve o valor de retorno) c n
+(                ) p
+(POP) K
+() p 24 T (R5 ) S
+(; recupera R5) c n
+(                ) p
+(POP) K
+() p 24 T (R4 ) S
+(; recupera R4) c n
+(                ) p
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RETN) K
+() p 24 T (2) N
+() N
+(;; check_digit: \(int, int, int\) -> bool) c n
+(;;) N
+(;; verifica se o digito, obtido pela aplicacao do filtro, esta presente no codig) N
+(o) N
+(;;) N
+(;; input: codigo, digito e filtro) N
+(;; output: 1 se o digito existir; 0 caso contrario) N
+(check_digit:    ) p
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1 ; nao preserva de R2, para saber quais ) c n
+(digitos ja foram retirados) N
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R4 ) S
+(; preserva R5) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R5 ) S
+(; preserva R4) c n
+() p n
+() N
+(                ) S
+(MOV) K
+() p 24 T (R1, 4 ) S
+(; contador) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, M[SP + 7] ) S
+(; R2 <- codigo - valores previamente encon) c n
+(trados na funcao) N
+(mastermind.as) (Page 5/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(MOV) K
+() p 24 T (R4, M[SP + 6]) N
+(                ) S
+(MOV) K
+() p 24 T (R5, filtro) N
+(                ) N
+(ciclo_digit:) S 16 T () S
+(MOV) K
+() p 24 T (R3, R2 ) S
+(; preserva localmente o codigo) c n
+() p 8 T () S 16 T () S
+(AND) K
+() p 24 T (R3, R5 ) S
+(; aplica filtro) c n
+() p n
+(                ) S
+(CMP) K
+() p 24 T (R3, R4 ) S
+(; verifica se o digito e igual) c n
+(                ) p
+(BR.NZ) K
+() p 24 T (salto_digit) N
+(                ) S
+(INC) K
+() p 24 T (M[SP + 8] ) S
+(; incrementa o valor de retorno, passa a 1) c n
+(                ) p
+(OR) K
+() p 24 T (R2, R5 ) S
+(; atualiza o codigo -> coloca-se o digito a 7) c n
+(                ) p
+(BR) K
+() p 24 T (ret_digit) N
+(                                    ) N
+(salto_digit:) S 16 T () S
+(ROL) K
+() p 24 T (R5, 3 ) S
+(; atualiza a posicao do filtro) c n
+() p 8 T () S 16 T () S
+(ROL) K
+() p 24 T (R4, 3 ) S
+(; atualiza a posicao do digito) c n
+() p 8 T () S 16 T () S
+(DEC) K
+() p 24 T (R1) N
+() S 8 T () S 16 T () S
+(BR.NZ) K
+() p 24 T (ciclo_digit) N
+() N
+(ret_digit:) S 16 T () S
+(POP) K
+() p 24 T (R5 ) S
+(; recupera R5) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R4 ) S
+(; recupera R4) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RETN) K
+() p 24 T (2) N
+() N
+() N
+(; modulo print) c n
+(; imprime o output do programa) N
+() p n
+(;; print: void ) c n
+(;;) N
+(;; modulo que estrutura a impressao do output do programa no ciclo de execucao d) N
+(o jogo) N
+(;; serve apenas para aumentar a legibilidade do codigo no ciclo de execucao) N
+(print: ) p 8 T (        ) S
+(MOV) K
+() p 24 T (R2, R0 ) S
+(; limpa o R2) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, R0 ) S
+(; limpa o R2) c n
+() p 8 T () S 16 T () S
+(MVBH) K
+() p 24 T (R2, M[resultado] ) S
+(; Oes) c n
+() p 8 T () S 16 T () S
+(ROR) K
+() p 24 T (R2, 8 ) S
+(; coloca o octeto na posicao correta) c n
+() p 8 T () S 16 T () S
+(MVBL) K
+() p 24 T (R3, M[resultado] ) S
+(; Xes) c n
+(                ) p
+(PUSH) K
+() p 24 T (R2) N
+(                ) S
+(PUSH) K
+() p 24 T (R3) N
+(                ) S
+(PUSH) K
+() p 24 T (M[jogada]) N
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; coloca o contador para impressao) c n
+(                ) p
+(CALL) K
+() p 24 T (print_line  ) S
+(; imprime a linha) c n
+() p n
+(                ) S
+(RET) K n
+() p n
+() N
+(;; print_char: char -> void) c n
+(;;) N
+(;; imprime um caracter na JV) N
+(;;) N
+(;; input: caracter a imprimir) N
+(print_char:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+(                ) p
+(MOV) K
+() p 24 T (R1, M[cursor] ) N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_CONTROL], R1 ) S
+(; coloca o cursor no lugar correto) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 3]  ) S
+(;coloca o caracter em R1) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[IO_WRITE], R1  ) S
+(;imprime) c n
+(                ) p
+(INC) K
+() p 24 T (M[cursor] ) S
+(; atualiza o cursor) c n
+(                ) p
+(POP) K
+() p 24 T (R1  ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+() p 24 T (1  ) N
+() N
+(;; newline: -> void) c n
+(;;) N
+(mastermind.as) (Page 6/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (3/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (7-8) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(;; introduz uma nova linha) c n
+(newline:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[cursor]) N
+(                ) S
+(AND) K
+() p 24 T (R1, FF00h ) S
+(; coloca o cursor na coluna zero) c n
+(                ) p
+(ADD) K
+() p 24 T (R1, 0100h ) S
+(; adiciona 1 a linha) c n
+(                ) p
+(MOV) K
+() p 24 T (M[cursor], R1) N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_CONTROL], R1 ) S
+(; atualiza o cursor) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+(;; print_str: str -> void) c n
+(;;) N
+(;; imprime uma cadeia de caracteres \(terminada pelo caracter '|'\) numa linha da ) N
+(JV) N
+(;;) N
+(;; input: endereco da cadeia de caracteres a imprimir) N
+(print_str:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 4] ) S
+(; coloca o endereco da string em R1) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, '|' ) S
+(; coloca o valor ascii do caracter terminal em R) c n
+(2) N
+(ciclo_str:) p 16 T () S
+(CMP) K
+() p 24 T (M[R1], R2 ) S
+(; verifica se o caracter e o terminal) c n
+() p 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (fim_str) N
+(                ) S
+(PUSH) K
+() p 24 T (M[R1] ) N
+(                ) S
+(CALL) K
+() p 24 T (print_char ) S
+(; imprime o caracter) c n
+(                ) p
+(INC) K
+() p 24 T (R1 ) S
+(; incrementa o indice) c n
+(                ) p
+(BR) K
+( ) p 24 T (ciclo_str) N
+() N
+(fim_str:) S 16 T () S
+(CALL) K
+() p 24 T (newline ) S
+(; imprime uma nova linha) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+() p 8 T () S 16 T () S
+(RETN) K
+() p 24 T (1) N
+() N
+(;; print_digit: int -> void) c n
+(;;) N
+(;; imprime um digito na JV) N
+(;;) N
+(;; input: digito decimal inteiro a imprimir) N
+(print_digit:) p 16 T () S
+(PUSH) K
+() p 24 T (R1  ) S
+(; preserva R1) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R1, M[cursor] ) N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_CONTROL], R1 ) S
+(; coloca o cursor no lugar correto) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 3]  ) S
+(;coloca o caracter em R1) c n
+() p 8 T () S 16 T () S
+(ADD) K
+() p 24 T (R1, '0'  ) S
+(;converte para ascii) c n
+(                ) p
+(MOV) K
+() p 24 T (M[IO_WRITE], R1  ) S
+(;imprime) c n
+(                ) p
+(INC) K
+() p 24 T (M[cursor] ) S
+(; atualiza o cursor) c n
+(                ) p
+(POP) K
+() p 24 T (R1  ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+() p 24 T (1) N
+() N
+(;; print_jogada: int -> void) c n
+(;;) N
+(;; imprime um codigo de 4 digitos \(em 12 bits\) na JV) N
+(;;) N
+(;; input: jogada) N
+(print_jogada:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+(              ) p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 5] ) S
+(; coloca o parametro em R1) c n
+(                ) p
+(ROL) K
+() p 24 T (R1, 4 ) S
+(; "encosta" o n\303\272mero ) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, 4  ) S
+(; contador) c n
+(mastermind.as) (Page 7/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(guess_ciclo:) S 16 T () S
+(ROL) K
+() p 24 T (R1, 3 ) S
+(; coloca o digito mais significativo na posi\303\247\303\243o ) c n
+(menos significativa) N
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R3, R1 ) S
+(; preserva o R1) c n
+(                ) p
+(AND) K
+() p 24 T (R3, filtro ) S
+(; coloca em R3 o bit menos significativo) c n
+(                ) p
+(PUSH) K
+() p 24 T (R3) N
+(                ) S
+(CALL) K
+() p 24 T (print_digit ) S
+(;imprime R3) c n
+() p n
+(                ) S
+(DEC) K
+() p 24 T (R2) N
+(                ) S
+(BR.NZ) K
+() p 24 T (guess_ciclo) N
+() N
+() S 8 T () S 16 T () S
+(POP) K
+() p 24 T (R3 ) S
+(; recupera o R3) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera o R2) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+() p 24 T (1) N
+() N
+(;; print_count: int -> void) c n
+(;;) N
+(;; imprime o contador \(decimal com 2 digitos\)) N
+(;;) N
+(;; input: contador \(decimal com 2 digitos\)) N
+(print_count:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 4] ) S
+(; coloca o parametro em R1) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, ah ) N
+(                ) S
+(DIV) K
+() p 24 T (R1, R2 ) S
+(; em R1 est\303\241 o algarismo das dezenas e em R2 as ) c n
+(unidades) N
+() p n
+() S 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (unidades ) S
+(; verifica se o algarismo das dezenas e zero) c n
+(                ) p
+(PUSH) K
+() p 24 T (R1) N
+(                ) S
+(CALL) K
+() p 24 T (print_digit ) S
+(; imprime algarismo das dezenas) c n
+() p n
+(unidades:) S 16 T () S
+(PUSH) K
+() p 24 T (R2) N
+(                ) S
+(CALL) K
+() p 24 T (print_digit ) S
+(; imprime algarismo das unidades) c n
+() p n
+() S 8 T () S 16 T () S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera o R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+() p 24 T (1) N
+() N
+(;; print_result: \(int, int\) -> void) c n
+(;;) N
+(;; imprime o resultado da jogada) N
+(;;) N
+(;; input: numero de X's a imprimir e numero de O's a imprimir) N
+(print_result:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 6] ) S
+(; R1 <- #Xes ) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, M[SP + 5] ) S
+(; R2 <- #Oes ) c n
+(                ) p
+(MOV) K
+() p 24 T (R3, 4 ) S
+(; numero de tracos a colocar) c n
+(                ) p
+(SUB) K
+() p 24 T (R3, R1 ) S
+(; subtrai o numero de X's                        ) c n
+(  ) N
+(                ) p
+(SUB) K
+() p 24 T (R3, R2 ) S
+(; subtrai o numero de O's) c n
+() p n
+(print_xes:) S 16 T () S
+(CMP) K
+() p 24 T (R1, R0) N
+() S 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (print_oes ) S
+(; verifica se o contador esta em 0) c n
+() p n
+(                ) S
+(PUSH) K
+() p 24 T ('X') N
+(                ) S
+(CALL) K
+() p 24 T (print_char ) S
+(; imprime 'X') c n
+(                ) p
+(DEC) K
+() p 24 T (R1) N
+(mastermind.as) (Page 8/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (4/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (9-10) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(BR) K
+() p 24 T (print_xes) N
+() N
+(print_oes:) S 16 T () S
+(CMP) K
+() p 24 T (R2, R0) N
+() S 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (print_dash  ) S
+(; verifica se o contador esta em 0) c n
+() p n
+(                ) S
+(PUSH) K
+() p 24 T ('O') N
+(                ) S
+(CALL) K
+() p 24 T (print_char  ) S
+(; imprime 'O') c n
+(                ) p
+(DEC) K
+() p 24 T (R2) N
+(                ) S
+(BR) K
+() p 24 T (print_oes) N
+() N
+(print_dash:) S 16 T () S
+(CMP) K
+() p 24 T (R3, R0  ) N
+() S 8 T () S 16 T () S
+(BR.Z) K
+() p 24 T (ret_result  ) S
+(; verifica se o contador esta em 0) c n
+() p n
+(                ) S
+(PUSH) K
+() p 24 T ('-') N
+(                ) S
+(CALL) K
+() p 24 T (print_char ) S
+(; imprime '-') c n
+(                ) p
+(DEC) K
+() p 24 T (R3) N
+(                ) S
+(BR) K
+() p 24 T (print_dash) N
+() N
+(ret_result:) S 16 T () S
+(CALL) K
+() p 24 T (newline ) S
+(; imprime uma nova linha) c n
+() p n
+(                ) S
+(POP) K
+() p 24 T (R3 ) S
+(; recupera o R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera o R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+() p 24 T (2) N
+() N
+(;; print_line:   \(int, int, int, int\) -> void) c n
+(;;) N
+(;; imprime uma linha, ou seja, o output de uma ronda do programa) N
+(;;) N
+(;; input: contador, jogada, numero de x's e numero de o's) N
+(print_line:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 4] ) S
+(; contador de jogada) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+( ) p 24 T (R1) N
+(                ) S
+(CALL) K
+() p 24 T (print_count ) S
+(; imprime o contador) c n
+() p n
+(                ) S
+(PUSH) K
+() p 24 T (':') N
+(                ) S
+(CALL) K
+() p 24 T (print_char) N
+() N
+(                ) S
+(PUSH) K
+() p 24 T (' ') N
+(                ) S
+(CALL) K
+() p 24 T (print_char) N
+() N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[SP + 5] ) S
+(; guess) c n
+(                ) p
+(PUSH) K
+() p 24 T (R1) N
+(                ) S
+(CALL) K
+() p 24 T (print_jogada ) S
+(; imprime a jogada) c n
+() p n
+(                ) S
+(PUSH) K
+() p 24 T (':') N
+(                ) S
+(CALL) K
+() p 24 T (print_char) N
+() N
+(                ) S
+(PUSH) K
+() p 24 T (' ') N
+(                ) S
+(CALL) K
+() p 24 T (print_char) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (R1, M[SP + 6] ) S
+(; R1 <- #Xes) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, M[SP + 7] ) S
+(; R2 <- #Oes) c n
+(                ) p
+(PUSH) K
+() p 24 T (R1) N
+(                ) S
+(PUSH) K
+() p 24 T (R2) N
+(                ) S
+(CALL) K
+() p 24 T (print_result ) S
+(; imprime resultado) c n
+() p n
+() S 8 T () S 16 T () S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera o R2) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera o R1) c n
+(                ) p
+(RETN) K
+( 4) p n
+(mastermind.as) (Page 9/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(;; limpa_jt: void -> void) c n
+(;;) N
+(;; limpa a janela de texto) N
+(limpa_jt:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_CONTROL], R0 ) S
+(; coloca o cursor no inicio) c n
+(                ) p
+(MOV) K
+() p 24 T (M[cursor], R0 ) S
+(; atualiza o cursor) c n
+(                ) p
+(MOV) K
+(     R1, 10000 ) p
+(; numero arbitrariamente grande) c n
+(clear_ciclo:) p 16 T () S
+(PUSH) K
+() p 24 T (SPACE) N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (print_char) N
+(                ) S
+(DEC) K
+() p 24 T (R1) N
+(                ) S
+(BR.NZ) K
+() p 24 T (clear_ciclo) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_CONTROL], R0 ) S
+(; coloca o cursor no inicio) c n
+(                ) p
+(MOV) K
+() p 24 T (M[cursor], R0 ) S
+(; atualiza o cursor) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K
+(               ) p n
+() N
+(; modulo random) c n
+(; gera um numero pseudoaleatorio) N
+() p n
+(;; random: void -> int) c n
+(;;) N
+(;; gera um numero pseudoaleatorio, sendo a seed enderecada por semente) N
+(;;) N
+(;; output: numero aleatorio hexadecimal em que cada digito esta entre 1 e 6) N
+(random:   ) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R4 ) S
+(; preserva R4) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R5 ) S
+(; preserva R5) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R6 ) S
+(; preserva R6) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, 4 ) S
+(; contador) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, M[semente] ) N
+(                ) S
+(MOV) K
+() p 24 T (R3, R0 ) S
+(; numero gerado) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R4, mascara) N
+() N
+(rand_cycle:) S 16 T () S
+(ROL) K
+() p 24 T (R3, 3 ) S
+(; gera espaco para o proximo digito) c n
+(                ) p
+(MOV) K
+() p 24 T (R5, 6 ) S
+(; n\303\272mero m\303\241ximo ) c n
+() p n
+(                ) S
+(TEST) K
+() p 24 T (R2, 1) N
+(                ) S
+(BR.Z) K
+() p 24 T (jump) N
+() S 8 T (        ) S
+(XOR) K
+() p 24 T (R2, R4 ) N
+() N
+(jump:) S 8 T () S 16 T () S
+(ROR) K
+() p 24 T (R2, 1) N
+(                ) S
+(MOV) K
+() p 24 T (R6, R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(DIV) K
+() p 24 T (R6, R5 ) S
+(; garante que o valor esta entre 0 e 5) c n
+(                ) p
+(INC) K
+() p 24 T (R5 ) S
+(; garante que o resultado esta entre 1 e 6) c n
+() p 8 T () S 16 T () S
+(ADD) K
+() p 24 T (R3, R5 ) S
+(;Devolve o resultado para o numero de 4 algarismo) c n
+(s) N
+() p n
+(                ) S
+(DEC) K
+() p 24 T (R1) N
+(                ) S
+(BR.NZ) K
+() p 24 T (rand_cycle) N
+() N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[semente], R3) N
+(                ) S
+(MOV) K
+() p 24 T (M[SP + 8], R3) N
+(                ) S
+(POP) K
+() p 24 T (R6 ) S
+(; recupera R6) c n
+(                ) p
+(POP) K
+() p 24 T (R5 ) S
+(; recupera R5) c n
+(                ) p
+(POP) K
+() p 24 T (R4 ) S
+(; recupera R4) c n
+(                ) p
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(mastermind.as) (Page 10/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (5/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (11-12) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K
+(                       ) p n
+() N
+(;; get_seed: -> int) c n
+(;;) N
+(;; imprime a mensagem de inicio de jogo, inicia o temporizador e aguardando pela) N
+( interru\303\247\303\243o A) N
+(;; quando esta acontecer, para o temporizador e devolve o seu valor) N
+(;; limpa depois a janela de texto) N
+(;;) N
+(;; output: semente para a geracao de um numero pseudoaleatorio) N
+(get_seed:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R1, ) S
+(INT) K
+(_MASK) p n
+(                ) S
+(ADD) K
+() p 24 T (R1, 1024 ) S
+(; permite a interrupcao INTA) c n
+(                ) p
+(MOV) K
+() p 24 T (M[) S
+(INT) K
+(_MASK_ADDR], R1) p n
+() N
+(                ) S
+(MOV) K
+() p 24 T (R1, R0) N
+() N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (reset_timer) N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (start_timer) N
+() N
+(                ) S
+(ENI) K n
+(                ) p
+(PUSH) K
+() p 24 T (inicia_jogo) N
+(                ) S
+(CALL) K
+() p 24 T (print_str ) S
+(; imprime a mensagem para iniciar o jogo) c n
+(wait_for_seed:  ) p
+(CMP) K
+() p 24 T (R1, R0 ) S
+(; como convencionado em INTAF, R1 e alterado) c n
+(                ) p
+(BR.Z) K
+() p 24 T (wait_for_seed ) S
+(; para ficar com o valor do temporizador q) c n
+(uando INTA for premido) N
+(                ) p
+(DSI) K n
+() p n
+(                ) S
+(CALL) K
+() p 24 T (limpa_jt) N
+(                ) S
+(MOV) K
+() p 24 T (M[SP + 3], R1 ) S
+(; escreve o resultado no stack) c n
+(                ) p
+(MOV) K
+() p 24 T (R1, ) S
+(INT) K
+(_MASK) p n
+(                ) S
+(MOV) K
+() p 24 T (M[) S
+(INT) K
+(_MASK_ADDR], R1 ) p
+(; bloqueia a interrupcao INTA) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+(; modulo interface) c n
+(; faz a gestao dos perifericos, tanto para o input como para o output) N
+() p n
+(;; display: void ) c n
+(;;) N
+(;; modulo que estrutura o display, para tornar a funcao da jogada de uma ronda) N
+(;; mais legivel) N
+(display:) p 16 T () S
+(MOV) K
+() p 24 T (M[pont_atual], R1 ) S
+(; guarda o valor atual em mem\303\263ria) c n
+() p 8 T () S 16 T () S
+(CALL) K
+() p 24 T (display_current) N
+(                ) S
+(CALL) K
+() p 24 T (display_best) N
+(                ) S
+(RET) K n
+() p n
+() N
+() N
+(;; diplay_best: int -> void) c n
+(;;) N
+(;; imprime o melhor resultado no display LCD) N
+(;;) N
+(;; input: a melhor jogada, endere\303\247ada melhor_pont) N
+(display_best:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva o R2) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, 80a0h) N
+(                ) S
+(MOV) K
+( ) p 24 T (M[LCD_CONTROL], R2) S
+(; liga o LCD e limpa-o) c n
+() p n
+(mastermind.as) (Page 11/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[melhor_pont]) N
+(                ) S
+(MOV) K
+() p 24 T (R2, 10) N
+(                ) S
+(DIV) K
+() p 24 T (R1, R2 ) S
+(; R1, segundo digito - R2, primeiro digito) c n
+(                ) p
+(ADD) K
+() p 24 T (R1, ZERO) N
+(                ) S
+(ADD) K
+() p 24 T (R2, ZERO) N
+(                ) S
+(MOV) K
+() p 24 T (M[LCD_WRITE], R1 ) S
+(; imprime o segundo digito) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R1, 8001h) N
+(                ) S
+(MOV) K
+() p 24 T (M[LCD_CONTROL], R1 ) S
+(; posiciona o LCD na segunda coluna) c n
+(                ) p
+(MOV) K
+() p 24 T (M[LCD_WRITE], R2 ) S
+(; imprime o segundo digito) c n
+() p n
+(                ) S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+(;; diplay_current: int -> void) c n
+(;;) N
+(;; imprime o resultado atual no display de 7 segmentos) N
+(;;) N
+(;; input: o resultado atual, endere\303\247ado em pont_atual) N
+(display_current:) p
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva o R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva o R3) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R1, M[pont_atual]) N
+(                ) S
+(MOV) K
+() p 24 T (R2, 10) N
+(                ) S
+(DIV) K
+() p 24 T (R1, R2 ) S
+(; R1, segundo digito - R2, primeiro digito) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R3, IO_DISPLAY) N
+(                ) S
+(MOV) K
+() p 24 T (M[R3], R2) N
+(                ) S
+(INC) K
+() p 24 T (R3) N
+(                ) S
+(MOV) K
+() p 24 T (M[R3], R1) N
+() N
+(                ) S
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+() N
+(;; diplay_time: int -> void) c n
+(;;) N
+(;; mostra o tempo que falta nos LEDS) N
+(;;) N
+(;; input: o tempo que falta, endere\303\247ado em tempo_restante) N
+(display_time:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, M[tempo_restante]) N
+(                ) S
+(MOV) K
+() p 24 T (M[IO_LEDS], R1) N
+(                ) S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K
+( ) p n
+() N
+(;; get_input: -> int) c n
+(;;) N
+(;; recebe um input da placa) N
+(;; output: uma jogada, guardada em 12 bits, onde cada 3 bits correspondem a um d) N
+(igito) N
+(get_input:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R4 ) S
+(; preserva R4) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R5 ) S
+(; preserva R5) c n
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, ) S
+(INT) K
+(_MASK) p n
+(mastermind.as) (Page 12/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (6/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (13-14) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(ADD) K
+() p 24 T (R1, 1111110b ) S
+(; ativa as interrupcoes INT1 - INT6) c n
+(                ) p
+(MOV) K
+() p 24 T (M[) S
+(INT) K
+(_MASK_ADDR], R1) p n
+(                ) S
+(MOV) K
+() p 24 T (R1, FFFFh) N
+(                ) S
+(MOV) K
+() p 24 T (M[tempo_restante], R1 ) S
+(; inicializa o tempo que falta) c n
+(                ) p
+(MOV) K
+() p 24 T (R1, 4 ) S
+(; contador) c n
+(                ) p
+(MOV) K
+() p 24 T (R2, R0 ) S
+(; resultado) c n
+(                ) p
+(MOV) K
+( ) p 24 T (R4, M[tempo_restante]) N
+(                ) S
+(MOV) K
+() p 24 T (R5, TEMP_STEP ) S
+(; para comparacao) c n
+() p n
+() S 8 T () S 16 T () S
+(ENI) K n
+(                ) p
+(CALL) K
+() p 24 T (display_time) N
+() S 8 T (    ) S 16 T () S
+(CALL) K
+() p 24 T (reset_timer) N
+(                ) S
+(CALL) K
+() p 24 T (start_timer) N
+() N
+(input_macro:) S 16 T () S
+(MOV) K
+() p 24 T (R3, R0 ) S
+(; digito, por convencao [ver INT1F - INT6F]) c n
+(input_micro:    ) p
+(CMP) K
+() p 24 T (M[temporizador], R5) N
+() S 8 T () S 16 T () S
+(BR.NZ) K
+() p 24 T (wait_timer ) S
+(; se o temporizador chegar aos 5 \(500ms\), atu) c n
+(aliza o tempo restante) N
+(                ) p
+(SHR) K
+() p 24 T (R4, 1 ) S
+(; apaga um led) c n
+(                ) p
+(MOV) K
+() p 24 T (M[tempo_restante], R4 ) S
+(; atualiza o tempo restante) c n
+(                ) p
+(CALL) K
+() p 24 T (display_time ) S
+(; atualiza o display) c n
+() p 8 T () S 16 T () S
+(CMP) K
+() p 24 T (R4, R0) N
+(                ) S
+(BR.Z) K
+() p 24 T (return_input ) S
+(; se o tempo for excedido, retorna 0     ) c n
+() p 8 T (    ) S 16 T () S
+(CALL) K
+() p 24 T (reset_timer) N
+(                ) S
+(CALL) K
+() p 24 T (start_timer) N
+(               ) N
+(wait_timer:) S 16 T () S
+(CMP) K
+() p 24 T (R3, R0) N
+(                ) S
+(BR.Z) K
+() p 24 T (input_micro) N
+(                ) S
+(ROL) K
+() p 24 T (R2, 3 ) S
+(; cria espa\303\247o para o digito) c n
+(                ) p
+(ADD) K
+() p 24 T (R2, R3 ) S
+(; adiciona o digito) c n
+(                ) p
+(DEC) K
+() p 24 T (R1) N
+(                ) S
+(BR.NZ) K
+() p 24 T (input_macro) N
+() N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, ) S
+(INT) K
+(_MASK) p n
+(                ) S
+(MOV) K
+() p 24 T (M[) S
+(INT) K
+(_MASK_ADDR], R1 ) p
+(; impede as interrupcoes INT1 - INT) c n
+(6) N
+(                ) p
+(DSI) K n
+(                ) p
+(MOV) K
+() p 24 T (M[SP + 7], R2 ) S
+(; devolve o resultado) c n
+() p n
+(return_input:) S 16 T () S
+(POP) K
+() p 24 T (R5 ) S
+(; recupera R5) c n
+(                ) p
+(POP) K
+() p 24 T (R4 ) S
+(; recupera R4) c n
+(                ) p
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+() N
+(; modulo temporizador) c n
+(; temporizador) N
+() p n
+(;; start_timer: void) c n
+(;; ) N
+(;; inicia o temporizador) N
+(start_timer:) p 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva o R1) c n
+() p 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, 1) N
+() S 8 T () S 16 T () S
+(MOV) K
+(     M[TEMP_VALUE], R1) p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, 1) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[TEMP], R1) N
+(                ) S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+(;; reset_timer: void) c n
+(mastermind.as) (Page 13/15) (Nov 24, 17 14:37) title
+border
+/v 1 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(;;) c n
+(;; coloca o temporizador a 0 e desativa o temporizador) N
+(reset_timer:) p 16 T () S
+(MOV) K
+() p 24 T (M[temporizador], R0) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[TEMP], R0 ) S
+(; desativa o temporizador) c n
+(                ) p
+(RET) K n
+() p n
+() N
+(;; modulo jogo) c n
+() p n
+(;; ronda: void) c n
+(;;) N
+(;; permite jogar uma ronda; estrutura geral do jogo) N
+(;; recebe os inputs) N
+(;; faz o display e a impressao na janela de texto de todos os outputs) N
+(ronda: ) p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R1 ) S
+(; preserva R1) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2 ) S
+(; preserva R2) c n
+() p 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R3 ) S
+(; preserva R3) c n
+() p n
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R0) N
+(                ) S
+(CALL) K
+() p 24 T (get_seed ) S
+(; gera uma semente) c n
+(                ) p
+(POP) K
+() p 24 T (M[semente] ) S
+(; guarda a semente em memoria) c n
+() p n
+() S 8 T () S 16 T () S
+(PUSH) K
+( ) p 24 T (R0) N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (random ) S
+(; gera o codigo pseudoaleatorio) c n
+(                ) p
+(POP) K
+() p 24 T (M[codigo] ) S
+(; armazena-o no endereco codigo) c n
+() p n
+(                ) S
+(MOV) K
+() p 24 T (R1, 1 ) S
+(; contador) c n
+(                ) p
+(CALL) K
+() p 24 T (display ) S
+(; apresenta o display inicial) c n
+() p n
+(ciclo_ronda:) S 16 T () S
+(PUSH) K
+() p 24 T (R0) N
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (get_input ) S
+(; recebe input) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (M[jogada] ) S
+(; guarda jogada) c n
+(                ) p
+(CMP) K
+() p 24 T (M[jogada], R0) N
+(                ) S
+(BR.Z) K
+() p 24 T (etiq_perdeu ) S
+(; verifica se o tempo foi excedido) c n
+() p n
+() S 8 T () S 16 T () S
+(CALL) K
+() p 24 T (check_play ) S
+(; calcula o resultado da jogada) c n
+() p 8 T () S 16 T () S
+(CALL) K
+() p 24 T (print ) S
+(; imprime a jogada) c n
+(                ) p
+(CALL) K
+() p 24 T (display ) S
+(; atualiza os perifericos                       ) c n
+(               ) N
+() p n
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, 4) N
+(                ) S
+(CMP) K
+() p 24 T (M[resultado], R2) N
+(                ) S
+(BR.Z) K
+() p 24 T (etiq_ganhou ) S
+(; verifica se o jogo foi ganho) c n
+() p n
+() S 8 T () S 16 T () S
+(INC) K
+() p 24 T (R1) N
+(                ) S
+(CMP) K
+() p 24 T (R1, NROUNDS_LOST ) S
+(; o contador comeca a 1; acaba a contag) c n
+(em quando o contador for igual a pontuacao de perder o jogo) N
+(                ) p
+(BR.NZ) K
+() p 24 T (ciclo_ronda) N
+() N
+(etiq_perdeu:    ) S
+(PUSH) K
+() p 24 T (perdeu) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, NROUNDS_LOST) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (M[pont_atual], R1) S
+(; caso tenha perdido por excesso de tem) c n
+(po, atualiza a pontuacao adequadamente) N
+(                ) p
+(CALL) K
+() p 24 T (print_str ) S
+(; imprime mensagem de derrota) c n
+(                ) p
+(BR) K
+() p 24 T (return_ronda) N
+() N
+(etiq_ganhou:) S 16 T () S
+(PUSH) K
+() p 24 T (ganhou) N
+(                ) S
+(CALL) K
+() p 24 T (print_str ) S
+(; imprime mensagem de vitoria) c n
+() p n
+(return_ronda:   ) S
+(CALL) K
+() p 24 T (update_best ) S
+(; atualiza o recorde) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R3 ) S
+(; recupera R3) c n
+(                ) p
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+(mastermind.as) (Page 14/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (7/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (15) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.362408 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                ) p
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p n
+(;; update_best: \(input, input\) -> input) c n
+(;;) N
+(;; verifica se a pontuacao da jogada bateu o recorde; caso se verifique,) N
+(;; atualiza o recorde adequadamente) N
+(;;) N
+(;; como as variaveis em questao so existem em memoria, os inputs sao) N
+(;; passados diretamente pela memoria) N
+(;;) N
+(;; inputs: pontuacao atual e recorde) N
+(;; output: recorde atualizado) N
+(update_best:) p 16 T () S
+(PUSH) K
+() p 24 T (R1) N
+() S 8 T () S 16 T () S
+(PUSH) K
+() p 24 T (R2) N
+() N
+(                ) S
+(MOV) K
+() p 24 T (R1, M[pont_atual]) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R2, M[melhor_pont]) N
+() N
+(                ) S
+(CMP) K
+() p 24 T (R1, R2) N
+(                ) S
+(BR.NN) K
+() p 24 T (dont_update ) S
+(; se a diferenca for negativa, e preciso atu) c n
+(alizar) N
+(                ) p
+(MOV) K
+() p 24 T (M[melhor_pont], R1) N
+(dont_update:) S 16 T () S
+(POP) K
+() p 24 T (R2 ) S
+(; recupera R2) c n
+() p 8 T () S 16 T () S
+(POP) K
+() p 24 T (R1 ) S
+(; recupera R1) c n
+(                ) p
+(RET) K n
+() p 8 T () S 16 T () N
+( ) N
+(;; main: execucao principal do programa;) c n
+() p n
+(inicio:) S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, SP_INICIAL) N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (SP, R1) N
+() N
+() S 8 T () S 16 T () S
+(MOV) K
+() p 24 T (R1, FFFFh) N
+() S 8 T () S 16 T () S
+(MOV) K
+( ) p 24 T (M[IO_CONTROL], R1 ) S
+(; inicializa o porto de controlo da ja) c n
+(nela de texto) N
+() p n
+(joga_sempre:) S 16 T () S
+(CALL) K
+() p 24 T (ronda) N
+(                ) S
+(BR) K
+() p 24 T (joga_sempre) N
+() N
+() N
+(fim:) S 8 T () S 16 T () S
+(BR) K
+() p 24 T (fim  ) N
+(mastermind.as) (Page 15/15) (Nov 24, 17 14:37) title
+border
+grestore
+(Printed by Baltasar Dinis) rhead
+(../../Projeto/mastermind.as) (8/8) (Quinta Novembro 30, 2017) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF

@@ -1,0 +1,13 @@
+
+	            G L O B A L   R E F E R E N C E S
+
+	             Name               Value        Type
+	==============================|=======|===============
+	inicial                          0BBC         CONSTANT
+	Mask                             8016         CONSTANT
+	sp_inicial                       FDFF         CONSTANT
+	random                           0002            LABEL
+	rand_cycle                       000E            LABEL
+	jump                             0015            LABEL
+	start                            0024            LABEL
+	end                              002B            LABEL

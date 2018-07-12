@@ -1,0 +1,27 @@
+
+	            G L O B A L   R E F E R E N C E S
+
+	             Name               Value        Type
+	==============================|=======|===============
+	IO                               FFFE         CONSTANT
+	NL                               000A         CONSTANT
+	filtro                           0007         CONSTANT
+	sp_inicial                       FDFF         CONSTANT
+	Result                           8000         VARIABLE
+	Guess                            8001         VARIABLE
+	Code                             8002         VARIABLE
+	print_char                       0002            LABEL
+	print_digit                      0009            LABEL
+	print_guess                      0012            LABEL
+	guess_ciclo                      001A            LABEL
+	print_count                      0027            LABEL
+	unidades                         0032            LABEL
+	print_result                     0038            LABEL
+	print_xes                        0043            LABEL
+	print_oes                        004B            LABEL
+	print_dash                       0053            LABEL
+	ret_result                       005B            LABEL
+	print_line                       0063            LABEL
+	inicio                           008A            LABEL
+	ciclo                            008F            LABEL
+	fim                              00A0            LABEL

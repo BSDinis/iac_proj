@@ -1,0 +1,192 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Simple Sectioned Essay Template
+% LaTeX Template
+%
+% This template has been downloaded from:
+% http://www.latextemplates.com
+%
+% Note:
+% The \lipsum[#] commands throughout this template generate dummy text
+% to fill the template out. These commands should all be removed when 
+% writing essay content.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{report} 
+\usepackage{geometry} 
+\geometry{a4paper} 
+\usepackage{graphicx} 
+\usepackage{float} 
+\usepackage{wrapfig} 
+\linespread{1.2} % Line spacing
+%\setlength\parindent{0pt} % Uncomment to remove all indentation from paragraphs
+\graphicspath{{Pictures/}} % Specifies the directory where pictures are stored
+\usepackage[portuguese]{babel} % Uncomment to turn to portuguese
+\usepackage{listings}
+\usepackage{ragged2e}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{fancyhdr} % for headers and footers
+
+
+%\righthyphenmin=62
+%\lefthyphenmin=62
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=true,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=8
+}
+
+\lstset{style = mystyle}
+
+\begin{document}
+
+ 
+% headers
+\fancyhead[L]{Relatório do Projeto}
+\fancyhead[C]{Mastermind}
+\fancyhead[R]{LEIC-A}
+% footers
+\fancyfoot[L]{Introdução à Arquitectura de Computadores}
+\fancyfoot[C]{}
+\fancyfoot[R]{Instituto Superior Técnico}
+
+% need to specify the pagestyle as fancy
+\pagestyle{fancy}
+ 
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+
+% Information
+
+\begin{center} \large
+\includegraphics[width = 3cm] {/home/bdinis/Documents/IST/ist.jpg}\\
+{Baltasar \textsc{Dinis}, 89416} \\
+{Vasco \textsc{Rodrigues}, 89557} \\
+\end{center}
+
+%%%%
+
+
+\section*{Descrição Geral do Projeto}
+O programa implementado no projeto permite que o utilizador jogue o
+\textit{Mastermind} na placa ou no simulador do P3. Neste jogo, ao longo
+de um determinado número de rondas, o jogador introduz uma jogada, em
+que tenta adivinhar um código secreto, gerado pelo programa. A cada
+jogada o programa indica o número de dígitos certos na posição certa e o
+número de dígitos certos na posição errada. A pontuação corresponde ao número
+mínimo de jogadas necessárias para descobrir o número secreto, e é inicializada
+com o valor seguinte ao máximo de rondas que se pode jogar, garantindo que na 
+primeira ronda é atualizada.
+
+%A interação é feita através dos botões de interrupção, que permitem introduzir
+%um número de 4 dígitos, entre 1 e 6, que correspondem a uma jogada. Na janela de
+%texto é dada a avaliação da jogada, indicando o número da jogada, o
+%número introduzido, o número de dígitos certos na posição certa
+%(indicados por um \textbf{X}) e de dígitos certos na posição errada
+%(indicados por um \textbf{O}). Adicionalmente, na placa, os LED's indicam
+%quanto tempo resta, o botão IA permite começar/reiniciar o jogo, o
+%\textit{display} LCD indica a melhor pontuação até ao momento. O
+%\textit{display} de 7 segmentos indica qual a jogada atual.
+
+\section*{Visão Geral do Programa}
+O programa está organizado nos seguintes módulos:
+\begin{itemize}
+\item \textbf{Módulo Check:} Avalia a jogada
+  \begin{itemize}
+  \item check\_play: Faz a verificação geral da jogada, colocando os
+  argumentos na pilha e recolhendo o resultado para o por em memória.
+  Permite que a função que gere o jogo seja mais legível.
+  \item check: Faz a verificação da jogada, devolvendo o resultado.
+  \end{itemize}
+
+\item \textbf{Módulo Print:} Implementa funções para gerir a janela de
+texto
+  \begin{itemize}
+  \item print: Imprime a jogada, colocando internamente os argumentos da
+  função print\_line, permite que a função que gere o jogo seja mais
+  legível.
+  \item print\_str: Imprime uma string
+  \item print\_line: Imprime a interação correspondente a uma jogada
+  \item newline: Introduz uma nova linha
+  \item limpa\_jt: Limpa a janela de texto
+  \end{itemize}
+
+\newpage
+\item \textbf{Módulo Random:} Implementa funções para gerar números
+pseudoaleatórios.
+  \begin{itemize}
+  \item random: Gera um número pseudoaletório, mediante uma semente
+  disponível em memória
+  \item get\_seed: Gera uma semente, correspondente ao valor do
+  temporizador
+  \end{itemize}
+ 
+\item \textbf{Módulo Interface:} Gere a interação com o utilizador
+  \begin{itemize}
+  \item display: Atualiza todos os \textit{displays} da placa
+  \item get\_input: Recolhe uma jogada do utilizador num tempo limite
+  \end{itemize}
+ 
+\item \textbf{Módulo Temporizador:} Implementa um temporizador
+  \begin{itemize}
+  \item start\_timer: Inicia o temporizador
+  \item reset\_timer: Coloca o temporizador a zero e deixa-o desativado
+  \end{itemize}
+ 
+\item \textbf{Módulo Jogo:} Implementa a estrutura geral do jogo
+  \begin{itemize}
+  \item ronda: Permite jogar uma ronda
+  \item update\_best: Atualiza o recorde
+  \end{itemize}
+ 
+
+
+\end{itemize}
+\section*{Aspetos importantes da Implementação}
+Como descrito no enunciado, as jogadas estão codificadas em 12 bits. O
+resultado das jogadas encontra-se codificado em 16 bits, sendo o octeto
+mais significativo o número de \textbf{O's} e o menos significativo o
+número de \textbf{X's}. As funções preservam os valores dos registos que
+usam, sendo, por isso, estanques.
+
+Os valores relevantes para a gestão do jogo (como por exemplo, o
+contador da jogada, o recorde, a jogada, o resultado) e para a gestão
+adicionais(como por exemplo, o temporizador e a semente) estão
+armazenados em memória.
+
+\section*{Conclusão}
+O programa foi implementado de forma a que o
+nível de dificuldade (i.e. o tempo disponível para introduzir  uma
+jogada e o número de jogadas de uma ronda) seja facilmente alteráveis
+mudando o valor das constantes (NROUNDS\_LOST, NROUNDS\_MAX e
+TEMP\_STEP). Para além disso não foram implementadas funções adicionais,
+nem foram observadas divergências ao enunciado.
+No entanto, há diversas funções (em particular os módulos Print e Random), que
+podem ser reutilizadas.
+
+
+\end{document}
